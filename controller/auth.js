@@ -1,6 +1,12 @@
 const jwt = require('jsonwebtoken')
-const {BadRequest} = require('../errors')
+const {BadRequest,CustomAPIError,UnauthenticatedError} = require('../errors')
+const User = require('../models/user')
 
+const register = async (req,res)=>{
+       
+       const user = await User.create({...req.body})
+       res.status(201).json(user)
+}
 
 const login = (req, res) => {
        const {username,password} = req.body;
@@ -15,15 +21,9 @@ const login = (req, res) => {
        res.status(200).json({msg:'user created successfully',token})
 }
 
-const dashBoard = (req, res) => {
-      
-
-       res.status(200).json({ msg: `Hello,${req.user.username}` });
-       
-}
 
 module.exports = {
        login,
-       dashBoard
+       register
 }
 
