@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken')
 const {BadRequest,CustomAPIError,UnauthenticatedError} = require('../errors')
 const User = require('../models/user')
 
+
 const register = async (req,res)=>{
-       
        const user = await User.create({...req.body})
        res.status(201).json(user)
 }
