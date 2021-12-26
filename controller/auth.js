@@ -1,24 +1,35 @@
-const jwt = require('jsonwebtoken')
-const {BadRequest,CustomAPIError,UnauthenticatedError} = require('../errors')
+
+const {BadRequest,UnauthenticatedError} = require('../errors')
 const User = require('../models/user')
 
 
 const register = async (req,res)=>{
        const user = await User.create({...req.body})
-       res.status(201).json(user)
+       const token = user.createJWT();
+       res.status(201).json({user:{name:user.name},token})
 }
 
-const login = (req, res) => {
-       const {username,password} = req.body;
+const login = async(req, res) =>{
+       const {email,password} = req.body;
 
-       if(!username || !password){
+       if( !email || !password ){
               throw new BadRequest('please provide email and password')
-
        }
-       const id = new Date().getDate()
-       const token = jwt.sign({id,username},process.env.JWT_SECRET,{expiresIn:'30d'})
+       const user = await User.findOne({email})
 
-       res.status(200).json({msg:'user created successfully',token})
+       if(!user){
+             throw new UnauthenticatedError('Invalid Credentails') 
+       }
+
+       const isPasswordCorrect = await user.comparePassword(password)
+       if(!isPasswordCorrect){
+              throw new UnauthenticatedError('incorrect password') 
+        }
+
+       const token = user.createJWT();
+       res.status(200).json({user:{name:user.name},token})
+        
+ 
 }
 
 
